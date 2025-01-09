@@ -33,16 +33,21 @@ def setup_test_environment():
 
 @pytest.fixture
 def parser():
-    """Create a parser with default settings.
+    """Create a parser with default settings."""
+    return MarkdownParser(max_tokens=2000)
+
+@pytest.fixture
+def small_parser():
+    """Create a parser with small token limit.
     
     Should:
-    1. Create parser with default max_tokens
-    2. Create parser with default min_section_level
+    1. Create parser with small max_tokens for testing splits
+    2. Use default min_section_level
     
     Returns:
-        MarkdownParser: Default configuration
+        MarkdownParser: Small token configuration
     """
-    return MarkdownParser(max_tokens=2000)
+    return MarkdownParser(max_tokens=50)
 
 @pytest.fixture
 def client(setup_test_environment):

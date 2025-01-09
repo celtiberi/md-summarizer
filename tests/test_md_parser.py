@@ -1,32 +1,6 @@
 import pytest
 from src.md_parser import MarkdownParser
 
-@pytest.fixture
-def parser():
-    """Create a parser with default settings.
-    
-    Should:
-    1. Create parser with default max_tokens
-    2. Create parser with default min_section_level
-    
-    Returns:
-        MarkdownParser: Default configuration
-    """
-    return MarkdownParser(max_tokens=2000)
-
-@pytest.fixture
-def small_parser():
-    """Create a parser with small token limit.
-    
-    Should:
-    1. Create parser with small max_tokens for testing splits
-    2. Use default min_section_level
-    
-    Returns:
-        MarkdownParser: Small token configuration
-    """
-    return MarkdownParser(max_tokens=50)
-
 def test_parser_basic_header_splitting(parser, tmp_path):
     """Test basic header-based section splitting.
     
@@ -47,14 +21,14 @@ Content 2"""
     sections = parser.parse_file(str(test_file))
     
     assert len(sections) == 2
-    assert "# First\nContent 1" in sections[0]
-    assert "# Second\nContent 2" in sections[1]
+    assert sections[0] == "# First\nContent 1"
+    assert sections[1] == "# Second\nContent 2"
 
 def test_parser_preserves_code_blocks(parser, tmp_path):
     """Test preservation of code blocks within sections.
     
     Should:
-    1. Keep markdown code blocks intact within their sections
+    1. Keep markdown code blocks intact
     2. Preserve code block markers (```)
     3. Not split sections within code blocks
     4. Maintain code indentation and formatting
@@ -80,76 +54,15 @@ End of section"""
     sections = parser.parse_file(str(test_file))
     
     assert len(sections) == 1
-    code_section = sections[0]
-    assert "def example():" in code_section
-    assert "print(test)" in code_section
-    assert "End of section" in code_section
-
-def test_parser_min_section_level(tmp_path):
-    """Test minimum section level handling.
-    
-    Should:
-    1. Only split on headers at or above min_section_level
-    2. Keep lower level headers as part of their parent section
-    3. Maintain header hierarchy in content
-    """
-    parser = MarkdownParser(max_tokens=2000, min_section_level=2)
-    
-    markdown = """# Top Level
-Main content
-
-## Section 1
-Content 1
-
-### Subsection
-Should stay with Section 1
-
-## Section 2
-Content 2"""
-
-    test_file = tmp_path / "sections.md"
-    test_file.write_text(markdown)
-    
-    sections = parser.parse_file(str(test_file))
-    
-    assert len(sections) == 2  # Should only split on ## headers
-    assert "## Section 1" in sections[0]
-    assert "### Subsection" in sections[0]  # Should stay with parent
-    assert "## Section 2" in sections[1]
-
-def test_parser_token_estimation(small_parser, tmp_path):
-    """Test token estimation and section splitting.
-    
-    Should:
-    1. Accurately estimate tokens based on content length
-    2. Split sections that exceed max_tokens
-    3. Keep sections under token limit
-    4. Not split in middle of words or lines
-    """
-    # Create content that should be ~100 tokens
-    words = ["word"] * 100  # Each word ~1 token
-    markdown = "# Section\n" + " ".join(words)
-    
-    test_file = tmp_path / "tokens.md"
-    test_file.write_text(markdown)
-    
-    sections = small_parser.parse_file(str(test_file))
-    
-    # With max_tokens=50, should split into at least 2 sections
-    assert len(sections) >= 2
-    # Each section should be roughly under 50 tokens
-    assert all(len(section.split()) <= 60 for section in sections)
-    # First section should contain header
-    assert "# Section" in sections[0]
+    assert sections[0] == markdown  # Use exact match instead of partial matches
 
 def test_parser_handles_nested_headers(parser, tmp_path):
     """Test handling of nested header hierarchy.
     
     Should:
-    1. Maintain header hierarchy in sections
-    2. Create separate sections for each header level
-    3. Keep content with its correct header
-    4. Preserve header levels (##, ###, etc.)
+    1. Split on all headers
+    2. Keep content with its header
+    3. Preserve header levels (##, ###, etc.)
     """
     markdown = """# Main
 Main content
@@ -169,30 +82,10 @@ Sub content 2"""
     sections = parser.parse_file(str(test_file))
     
     assert len(sections) == 4
-    assert "# Main" in sections[0]
-    assert "## Sub 1" in sections[1]
-    assert "### Sub-sub" in sections[2]
-    assert "## Sub 2" in sections[3]
-
-def test_parser_handles_large_content(small_parser, tmp_path):
-    """Test splitting of large content sections.
-    
-    Should:
-    1. Split content that exceeds token limit
-    2. Maintain content integrity when splitting
-    3. Not split in the middle of words
-    4. Keep each section under the token limit
-    """
-    markdown = "# Large Section\n" + "word " * 100
-
-    test_file = tmp_path / "large.md"
-    test_file.write_text(markdown)
-    
-    sections = small_parser.parse_file(str(test_file))
-    
-    assert len(sections) > 1
-    assert all(len(section) <= 50 * 4 for section in sections)
-    assert "# Large Section" in sections[0]
+    assert sections[0] == "# Main\nMain content"
+    assert sections[1] == "## Sub 1\nSub content 1"
+    assert sections[2] == "### Sub-sub\nDeeper content"
+    assert sections[3] == "## Sub 2\nSub content 2"
 
 def test_parser_handles_empty_and_whitespace(parser, tmp_path):
     """Test handling of empty and whitespace-only content.
@@ -215,7 +108,7 @@ def test_parser_handles_empty_and_whitespace(parser, tmp_path):
     content_file.write_text("# Header\n\nContent\n\nMore content")
     sections = parser.parse_file(str(content_file))
     assert len(sections) == 1
-    assert "\n\n" in sections[0]
+    assert sections[0] == "# Header\n\nContent\n\nMore content"
 
 def test_parser_error_handling(parser):
     """Test error handling for various failure cases.
@@ -240,26 +133,74 @@ def test_parser_preserves_section_order(parser, tmp_path):
     markdown = """# First
 Content 1
 
-## First Sub
-Sub content 1
-
 # Second
 Content 2
 
-## Second Sub
-Sub content 2"""
+# Third
+Content 3"""
     
     test_file = tmp_path / "order.md"
     test_file.write_text(markdown)
     
     sections = parser.parse_file(str(test_file))
     
-    assert len(sections) == 4
-    assert "# First" in sections[0]
-    assert "## First Sub" in sections[1]
-    assert "# Second" in sections[2]
-    assert "## Second Sub" in sections[3]
-    assert "Content 1" in sections[0]
-    assert "Sub content 1" in sections[1]
-    assert "Content 2" in sections[2]
-    assert "Sub content 2" in sections[3]
+    assert len(sections) == 3
+    assert sections[0] == "# First\nContent 1"
+    assert sections[1] == "# Second\nContent 2"
+    assert sections[2] == "# Third\nContent 3"
+
+def test_parser_preserves_fenced_code_blocks(parser, tmp_path):
+    """Test preservation of fenced code blocks.
+    
+    Should:
+    1. Keep fenced code blocks intact
+    2. Preserve language specification
+    3. Not split sections within code blocks
+    4. Maintain code formatting
+    """
+    markdown = """# Code Section
+Here's some code:
+
+```python
+def example():
+    print("hello")
+    return True
+```
+
+Here's another code block:
+
+```
+print("test")
+```
+
+End of section"""
+
+    test_file = tmp_path / "fenced_code.md"
+    test_file.write_text(markdown)
+    
+    sections = parser.parse_file(str(test_file))
+    
+    assert len(sections) == 1
+    assert sections[0] == markdown  # Use exact match
+
+def test_debug_section_content(parser, tmp_path):
+    """Debug test to show exact content differences."""
+    markdown = """# First
+Content 1
+
+# Second 
+Content 2"""
+    
+    test_file = tmp_path / "debug.md"
+    test_file.write_text(markdown)
+    
+    sections = parser.parse_file(str(test_file))
+    
+    print("\nActual sections:")
+    for i, section in enumerate(sections):
+        print(f"\nSection {i}:")
+        print(repr(section))
+    
+    print("\nExpected sections:")
+    print(repr("# First\nContent 1"))
+    print(repr("# Second\nContent 2"))

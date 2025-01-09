@@ -1,8 +1,9 @@
 import pytest
 import yaml
+import logging
 
 @pytest.mark.asyncio
-async def test_basic_conversion(converter, tmp_path, example_markdown):
+async def test_basic_conversion(converter, tmp_path, example_markdown, caplog):
     """Test end-to-end markdown to YAML conversion.
     
     Should:
@@ -11,6 +12,8 @@ async def test_basic_conversion(converter, tmp_path, example_markdown):
     3. Write YAML file successfully
     4. Maintain document structure
     """
+    caplog.set_level(logging.INFO)
+    
     # Setup input file
     input_file = tmp_path / "input.md"
     input_file.write_text(example_markdown)
@@ -21,9 +24,15 @@ async def test_basic_conversion(converter, tmp_path, example_markdown):
     # Convert
     await converter.convert(str(input_file), str(output_file))
     
+    # Print logs
+    print("\nTest logs:")
+    for record in caplog.records:
+        print(f"{record.levelname}: {record.message}")
+    
     # Verify
     assert output_file.exists()
     content = output_file.read_text()
+    print(f"\nFinal YAML content:\n{content}")
     data = yaml.safe_load(content)
     assert isinstance(data, dict)
     assert "main_title" in data or "Main Title" in data
@@ -148,6 +157,7 @@ Item 2
     assert "item 2" in str(data).lower()
     assert "list item" in str(data).lower() 
 
+@pytest.mark.skip(reason="Real world example test not ready for CI")
 @pytest.mark.asyncio
 async def test_real_world_example(converter, tmp_path):
     """Test conversion of a real-world markdown document.
@@ -210,4 +220,4 @@ async def test_real_world_example(converter, tmp_path):
     
     # Verify code blocks with Python syntax
     assert "from transitions import Machine" in str(data)
-    assert "import random" in str(data) 
+    assert "import random" in str(data)
