@@ -2,9 +2,10 @@ import os
 import pytest
 from src.md_parser import MarkdownParser
 from src.openai_client import OpenAIClient
-from src.converter import MarkdownToYamlConverter
+from src.md_summarizer import MarkdownSummarizer
 from src.config.settings import Settings, EnvironmentType, PROJECT_ROOT
 from dotenv import load_dotenv
+import logging
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
@@ -34,7 +35,7 @@ def setup_test_environment():
 @pytest.fixture
 def parser():
     """Create a parser with default settings."""
-    return MarkdownParser(max_tokens=2000)
+    return MarkdownParser()
 
 @pytest.fixture
 def small_parser():
@@ -50,20 +51,20 @@ def small_parser():
     return MarkdownParser(max_tokens=50)
 
 @pytest.fixture
-def client(setup_test_environment):
-    """Create OpenAI client with test configuration.
+async def client():
+    """Create OpenAI client for testing."""
+    # Load environment variables
+    load_dotenv()
     
-    Should:
-    1. Create client with test API key
-    2. Use default model and retry settings
+    # Get API key from environment
+    api_key = os.getenv('OPENAI_API_KEY')
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY environment variable not set")
+        
+    # Create client
+    client = OpenAIClient(api_key=api_key)
     
-    Returns:
-        OpenAIClient: Test configuration
-    """
-    return OpenAIClient(
-        api_key=setup_test_environment.openai_api_key,
-        model=setup_test_environment.openai_model
-    )
+    return client
 
 @pytest.fixture
 def converter(setup_test_environment):
@@ -76,10 +77,11 @@ def converter(setup_test_environment):
     Returns:
         MarkdownToYamlConverter: Test configuration
     """
-    return MarkdownToYamlConverter(
+    openai_client = OpenAIClient(
         api_key=setup_test_environment.openai_api_key,
         model=setup_test_environment.openai_model
     )
+    return MarkdownSummarizer(openai_client=openai_client)
 
 @pytest.fixture
 def example_markdown():
@@ -112,3 +114,23 @@ Some content here with special chars: & < > "
 - Bullet list
 - With items
 """ 
+
+@pytest.fixture(autouse=True)
+def setup_logging():
+    """Configure logging for tests."""
+    # Create formatter with just the message
+    formatter = logging.Formatter('%(message)s')
+    
+    # Create console handler and set level
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(formatter)
+    
+    # Configure root logger
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+    
+    # Remove any existing handlers to avoid duplicate output
+    root_logger.handlers = []
+    
+    # Add our clean formatter
+    root_logger.addHandler(console_handler) 

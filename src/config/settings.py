@@ -74,17 +74,23 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Get cached settings instance"""
-    env = os.getenv("ENV", "development")
-    env_type = EnvironmentType(env)
-    env_file = os.path.join(PROJECT_ROOT, f".env.{env_type.value}")
+    """Get cached settings instance."""
+    # Check for ENV, default to using .env if not set
+    env = os.getenv("ENV")
+    
+    if env:
+        # Use environment-specific file (.env.development, .env.test, etc)
+        env_type = EnvironmentType(env)
+        env_file = os.path.join(PROJECT_ROOT, f".env.{env_type.value}")
+    else:
+        # Default to .env
+        env_file = os.path.join(PROJECT_ROOT, ".env")
+        env_type = EnvironmentType.DEVELOPMENT
     
     # Load environment file
     if os.path.exists(env_file):
         load_dotenv(env_file, override=True)
     else:
-        # Fallback to default .env
-        default_env = os.path.join(PROJECT_ROOT, ".env")
-        load_dotenv(default_env, override=True)
+        raise FileNotFoundError(f"Environment file not found: {env_file}")
     
     return Settings(env=env_type) 

@@ -9,6 +9,9 @@ TEST_DIR = tests
 test:
 	$(PYTEST) $(TEST_DIR)
 
+test-basic:
+	$(PYTEST) tests/test_md_summarizer.py::test_basic_summarization -v -s
+
 test-converter:
 	$(PYTEST) $(TEST_DIR)/test_converter.py
 
