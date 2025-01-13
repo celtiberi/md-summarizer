@@ -8,7 +8,7 @@ An AI-powered tool that reduces the token size of Markdown documents while prese
 
 ## Key Features
 
-- **Token Optimization**: Intelligently reduces document size to fit AI context windows
+- **Token Reduction**: Intelligently reduces document size to minimize token usage
 - **Structure Preservation**: Maintains document hierarchy and essential content
 - **Code Block Protection**: Preserves critical code examples and technical details
 - **Token Tracking**: Built-in monitoring of input/output token usage
