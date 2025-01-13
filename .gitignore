@@ -1,19 +1,28 @@
-# Environment variables
+# Environment files
 .env
-+.env.*
--!.env.example
+.env.*
+!.env.example
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
+.Python
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
 
 # Distribution / packaging
 dist/
 build/
 *.egg-info/
 
-# Virtual environment
-venv/
-env/
-.env/ 
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/ 

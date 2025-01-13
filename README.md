@@ -1,22 +1,32 @@
-# Markdown to YAML Converter
+# Markdown Summarizer AI
 
-A tool that converts technical documentation from Markdown to YAML format using OpenAI's API. Designed to handle large markdown files by intelligently splitting them into sections and processing them recursively.
+A tool that intelligently summarizes technical documentation to reduce token count while preserving code blocks and structure. Designed to create concise versions of documentation that are optimized for AI consumption (e.g., as context for LLM prompts) while remaining human-readable.
 
 ## Features
 
+- Reduces token count by 50-80% while maintaining key information
 - Recursive section processing with parent-child relationships
 - Maintains document hierarchy and structure
-- Preserves code blocks, tables, and formatting
+- Preserves code blocks in their original format
+- Intelligently selects representative code examples
+- Intelligent summarization of text content
 - Intelligent header level management
 - Environment-specific configurations
 - Token limit handling
+
+## Use Cases
+
+- Prepare documentation for use as context in LLM prompts
+- Reduce token usage when querying documentation with AI
+- Create concise versions of technical documentation that preserve code examples
+- Process large documentation files that would exceed token limits
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/md-to-yaml-ai.git
-cd md-to-yaml-ai
+git clone https://github.com/yourusername/md-summarizer-ai.git
+cd md-summarizer-ai
 ```
 
 2. Create and activate virtual environment:
@@ -47,7 +57,6 @@ cp .env.example .env.test
 ```env
 OPENAI_API_KEY=your-api-key-here
 OPENAI_MODEL=gpt-3.5-turbo
-MAX_TOKENS=2000
 LOG_LEVEL=INFO
 ```
 
@@ -55,19 +64,23 @@ LOG_LEVEL=INFO
 
 ### Command Line
 
-Convert a markdown file to YAML:
+Summarize a markdown file:
 ```bash
-python -m src.main --input docs/input.md --output dist/output.yaml --verbose
+python -m src.main --input docs/input.md --output dist/output.md --verbose
 ```
 
 ### Programmatic Usage
 
 ```python
-from src.converter import MarkdownToYamlConverter
+from md_summarizer import MarkdownSummarizer
+from md_summarizer.openai_client import OpenAIClient
 
-async def convert_docs():
-    converter = MarkdownToYamlConverter(api_key="your-api-key")
-    await converter.convert("input.md", "output.yaml")
+async def summarize_docs():
+    client = OpenAIClient(api_key="your-api-key")
+    summarizer = MarkdownSummarizer(client)
+    with open("input.md") as f:
+        content = f.read()
+    summary = await summarizer.summarize(content)
 ```
 
 ## Configuration
@@ -85,7 +98,6 @@ Configuration options:
 # OpenAI Settings
 OPENAI_API_KEY=your-api-key
 OPENAI_MODEL=gpt-3.5-turbo
-MAX_TOKENS=2000
 OPENAI_REQUEST_TIMEOUT=30
 OPENAI_MAX_TOKENS_PER_REQUEST=4000
 
@@ -99,14 +111,13 @@ YAML_INDENT=2
 ## Project Structure
 
 ```
-md-to-yaml-ai/
+md-summarizer-ai/
 ├── src/
 │   ├── __init__.py
 │   ├── main.py          # CLI entry point
-│   ├── converter.py     # Main conversion logic
+│   ├── md_summarizer.py # Main summarization logic
 │   ├── openai_client.py # OpenAI API client
 │   ├── prompts/         # Prompt templates
-│   ├── summarizer/      # Section processing
 │   └── config/         
 │       └── settings.py  # Configuration
 ├── tests/
@@ -160,5 +171,10 @@ pytest tests/test_openai_client.py::TestIntegration::test_with_child_summaries
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+This means:
+- You can use this software for personal and non-commercial purposes
+- If you want to use this software commercially, you need to make your source code available
+- Any modifications or derivative works must also be licensed under AGPL-3.0
+- See the LICENSE file for full details
 
