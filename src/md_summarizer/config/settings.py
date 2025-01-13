@@ -6,8 +6,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 from pydantic import field_validator
 
-# Get project root directory (one level up from src)
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+# Get project root (two levels up from config)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 class EnvironmentType(Enum):
     """Environment types"""

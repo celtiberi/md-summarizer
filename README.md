@@ -1,180 +1,99 @@
-# Markdown Summarizer AI
+# MD Summarizer
 
-A tool that intelligently summarizes technical documentation to reduce token count while preserving code blocks and structure. Designed to create concise versions of documentation that are optimized for AI consumption (e.g., as context for LLM prompts) while remaining human-readable.
+AI-powered Markdown document summarizer that preserves structure and code blocks.
+
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![PyPI version](https://badge.fury.io/py/md-summarizer.svg)](https://badge.fury.io/py/md-summarizer)
+[![GitHub issues](https://img.shields.io/github/issues/celtiberi/md-summarizer)](https://github.com/celtiberi/md-summarizer/issues)
+
+## Repository
+
+- Source Code: [https://github.com/celtiberi/md-summarizer](https://github.com/celtiberi/md-summarizer)
+- Issue Tracker: [https://github.com/celtiberi/md-summarizer/issues](https://github.com/celtiberi/md-summarizer/issues)
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+This means that:
+- You can use this software for any purpose
+- You can modify this software
+- You can distribute this software
+- You must include the license and copyright notice with each and every distribution
+- You must include the source code of any derivative works you distribute
+- Changes you make must be documented
+- Changes you make must use the same license
+- Changes you make must be made available when you distribute the software
+- If you use this software in a network service, you must make the complete source code available to users of the service
 
 ## Features
 
-- Reduces token count by 50-80% while maintaining key information
-- Recursive section processing with parent-child relationships
-- Maintains document hierarchy and structure
-- Preserves code blocks in their original format
-- Intelligently selects representative code examples
-- Intelligent summarization of text content
-- Intelligent header level management
-- Environment-specific configurations
-- Token limit handling
-
-## Use Cases
-
-- Prepare documentation for use as context in LLM prompts
-- Reduce token usage when querying documentation with AI
-- Create concise versions of technical documentation that preserve code examples
-- Process large documentation files that would exceed token limits
+- Maintains document structure and headings
+- Preserves code blocks and examples
+- Concurrent section processing
+- Token usage tracking
+- Multiple AI provider support
 
 ## Installation
 
-1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/md-summarizer-ai.git
-cd md-summarizer-ai
-```
-
-2. Create and activate virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Unix
-# or
-.venv\Scripts\activate  # Windows
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Set up your environment:
-```bash
-# Copy example environment file
-cp .env.example .env
-
-# Or use environment-specific files
-cp .env.example .env.development
-cp .env.example .env.production
-cp .env.example .env.test
-```
-
-5. Configure your environment file:
-```env
-OPENAI_API_KEY=your-api-key-here
-OPENAI_MODEL=gpt-3.5-turbo
-LOG_LEVEL=INFO
+pip install md-summarizer
 ```
 
 ## Usage
 
-### Command Line
-
-Summarize a markdown file:
-```bash
-python -m src.main --input docs/input.md --output dist/output.md --verbose
-```
-
-### Programmatic Usage
-
+Simple usage:
 ```python
 from md_summarizer import MarkdownSummarizer
-from md_summarizer.openai_client import OpenAIClient
 
-async def summarize_docs():
-    client = OpenAIClient(api_key="your-api-key")
-    summarizer = MarkdownSummarizer(client)
-    with open("input.md") as f:
-        content = f.read()
-    summary = await summarizer.summarize(content)
+# Initialize and summarize
+summarizer = MarkdownSummarizer()
+result = await summarizer.summarize(markdown_content)
+
+# Get usage statistics
+usage: pydantic_ai.usage.Usage = summarizer.usage()
+print(f"Requests: {usage.requests}")
+print(f"Input tokens: {usage.request_tokens}")
+print(f"Output tokens: {usage.response_tokens}")
+print(f"Total tokens: {usage.total_tokens}")
 ```
 
 ## Configuration
 
-The converter supports multiple environment configurations:
-
-1. Default: Uses `.env` file
-2. Environment-specific: Uses `.env.{environment}` when ENV is set:
-   - `ENV=development` → `.env.development`
-   - `ENV=test` → `.env.test`
-   - `ENV=production` → `.env.production`
-
-Configuration options:
-```env
-# OpenAI Settings
+Set environment variables or use .env file:
+```bash
+# Required
 OPENAI_API_KEY=your-api-key
-OPENAI_MODEL=gpt-3.5-turbo
-OPENAI_REQUEST_TIMEOUT=30
-OPENAI_MAX_TOKENS_PER_REQUEST=4000
 
-# Markdown Parser Settings
-DEFAULT_SECTION_SIZE=2000
-
-# Output Settings
-YAML_INDENT=2
+# Optional
+MODEL=gpt-3.5-turbo  # Default model
+LOG_LEVEL=INFO       # Logging level
 ```
-
-## Project Structure
-
-```
-md-summarizer-ai/
-├── src/
-│   ├── __init__.py
-│   ├── main.py          # CLI entry point
-│   ├── md_summarizer.py # Main summarization logic
-│   ├── openai_client.py # OpenAI API client
-│   ├── prompts/         # Prompt templates
-│   └── config/         
-│       └── settings.py  # Configuration
-├── tests/
-│   ├── __init__.py
-│   ├── test_openai_client.py
-│   └── utils/
-│       └── output_formatter.py
-├── requirements.txt
-└── README.md
-```
-
-## How It Works
-
-1. **Section Processing**:
-   - Parses markdown into hierarchical sections
-   - Maintains parent-child relationships
-   - Handles section level management
-
-2. **OpenAI Integration**:
-   - Converts sections using OpenAI's API
-   - Manages token limits automatically
-   - Preserves formatting and structure
-
-3. **Configuration Management**:
-   - Environment-specific settings
-   - Flexible configuration options
-   - Cached settings for performance
 
 ## Development
 
-### Testing
-
-Run tests with pytest:
 ```bash
+# Install development dependencies
+pip install -e ".[test]"
+
+# Run tests
 pytest
+
+# Run specific test
+make test-case TEST=test_name
 ```
 
-Run specific test:
-```bash
-pytest tests/test_openai_client.py::TestIntegration::test_with_child_summaries
-```
-### Contributing
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Run tests (`pytest`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## License
+Please make sure to update tests as appropriate.
 
-This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
-This means:
-- You can use this software for personal and non-commercial purposes
-- If you want to use this software commercially, you need to make your source code available
-- Any modifications or derivative works must also be licensed under AGPL-3.0
-- See the LICENSE file for full details
+Repository: [https://github.com/celtiberi/md-summarizer](https://github.com/celtiberi/md-summarizer)
 

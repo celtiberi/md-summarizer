@@ -1,7 +1,5 @@
 """Test output formatting utilities."""
-from src.config.settings import get_settings
-from pydantic_ai.usage import Usage
-from src.agent.document_agent import DocumentAgent
+from md_summarizer.agent import DocumentAgent
 
 star_count = 30
 

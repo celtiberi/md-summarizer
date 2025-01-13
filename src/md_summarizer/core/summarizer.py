@@ -1,17 +1,17 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 import logging
 import asyncio
 from pydantic_ai.usage import Usage
 
-from src.agent.document_agent import DocumentAgent
-from .md_parser import MarkdownParser, Section
+from ..agent import DocumentAgent
+from ..parser import MarkdownParser, Section
 
 class MarkdownSummarizer:
     """Summarizes markdown content by recursively processing sections."""
     
-    def __init__(self, agent: DocumentAgent):
+    def __init__(self, agent: Optional[DocumentAgent] = None):
         """Initialize summarizer with document agent."""
-        self.agent = agent
+        self.agent = agent or DocumentAgent()
         self.logger = logging.getLogger(__name__)
         self.parser = MarkdownParser()
 

@@ -1,8 +1,6 @@
 import os
 import pytest
-from src.md_parser import MarkdownParser
-from src.agent.document_agent import DocumentAgent
-from src.md_summarizer import MarkdownSummarizer
+from md_summarizer import MarkdownSummarizer, DocumentAgent, MarkdownParser
 import logging
 
 @pytest.fixture(scope="session", autouse=True)
@@ -19,7 +17,7 @@ def setup_test_environment():
     os.environ["ENV"] = "test"
     
     # Now import settings
-    from src.config.settings import get_settings
+    from md_summarizer.config.settings import get_settings
     
     yield get_settings()
 

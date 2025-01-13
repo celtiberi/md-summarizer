@@ -1,4 +1,4 @@
-#!/Users/patrickcremin/repo/md-to-yaml-ai/.venv/bin/python3.11
+#!/Users/patrickcremin/repo/md-summarizer/.venv/bin/python3.11
 # -*- coding: utf-8 -*-
 import re
 import sys

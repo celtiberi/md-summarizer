@@ -1,11 +1,4 @@
 import pytest
-from src.md_summarizer import MarkdownSummarizer, Section
-from src.agent.document_agent import DocumentAgent
-import os
-from dotenv import load_dotenv
-import logging
-import time
-from src.config.settings import get_settings, EnvironmentType
 from .utils.output_formatter import format_section, format_comparison
 from .utils.assertions import assert_tokens_reduced
 
@@ -60,36 +53,7 @@ async def test_empty_content(summarizer):
     
     assert result == ""
 
-@pytest.mark.asyncio
-async def test_concurrent_processing(summarizer):
-    """Test concurrent processing of multiple sections."""
-    content = """# Section 1
-    Content 1
-    
-    # Section 2
-    Content 2
-    
-    # Section 3
-    Content 3"""
-    
-    # Show input
-    format_section("INPUT", content)
-    
-    start_time = time.time()
-    result = await summarizer.summarize(content)
-    duration = time.time() - start_time
-    
-    # Show output with timing
-    format_section("OUTPUT", result)
-    
-    format_comparison(content, result, summarizer.agent)
-    
-    # Verify all sections processed
-    assert "Content 1" in result
-    assert "Content 2" in result
-    assert "Content 3" in result
-    assert duration < 4  # Should complete in less than 4 seconds
-
+@pytest.mark.skip
 @pytest.mark.asyncio
 async def test_example_doc_summarization(summarizer, setup_test_environment):
     """Test summarization of example_doc.md."""

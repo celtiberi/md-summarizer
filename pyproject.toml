@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "md_summarizer"
+version = "0.1.0"
+description = "AI-powered Markdown summarizer that preserves structure and code blocks"
+authors = [
+    { name = "Patrick Cremin" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pydantic-ai",
+    "python-dotenv",
+    "tiktoken",
+    "anthropic",
+    "transformers",
+]
+license = "AGPL-3.0"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+keywords = ["markdown", "summarizer", "ai", "nlp"]
+urls = {
+    "Homepage" = "https://github.com/celtiberi/md-summarizer",
+    "Bug Tracker" = "https://github.com/celtiberi/md-summarizer/issues",
+    "Source" = "https://github.com/celtiberi/md-summarizer",
+}
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-watch"
+]
+
+[tool.hatch.build]
+packages = ["src/md_summarizer"]

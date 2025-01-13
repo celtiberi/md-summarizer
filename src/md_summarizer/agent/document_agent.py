@@ -2,8 +2,8 @@ from typing import Optional, Dict
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.usage import Usage
 from pydantic import BaseModel
-from src.agent.prompts import get_summarization_prompt, get_system_prompt
-from src.config.settings import get_settings
+from ..agent.prompts import get_summarization_prompt, get_system_prompt
+from ..config.settings import get_settings
 import tiktoken
 from anthropic import Anthropic
 from transformers import AutoTokenizer
