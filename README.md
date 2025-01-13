@@ -27,13 +27,6 @@ An AI-powered tool that reduces the token size of Markdown documents while prese
 - Issue Tracker: [https://github.com/celtiberi/md-summarizer/issues](https://github.com/celtiberi/md-summarizer/issues)
 service, you must make the complete source code available to users of the service
 
-## Features
-
-- Maintains document structure and headings
-- Preserves code blocks and examples
-- Concurrent section processing
-- Multiple AI provider support through pydantic_ai
-
 ## Installation
 
 ```bash
