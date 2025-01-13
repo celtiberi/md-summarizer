@@ -1,6 +1,6 @@
 # MD Summarizer
 
-An AI-powered tool that reduces the token size of Markdown documents while preserving their essential structure and meaning. Designed to help fit documentation into AI context windows without losing critical information, code examples, or document organization.
+An AI-powered tool that reduces the token size of Markdown documents while preserving their essential structure, code blocks, and meaning. Designed to help fit documentation into AI context windows without losing critical information, code examples, or document organization.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PyPI version](https://badge.fury.io/py/md-summarizer.svg)](https://badge.fury.io/py/md-summarizer)
