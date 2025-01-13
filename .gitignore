@@ -26,3 +26,11 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/ 
+
+# System files
+.DS_Store
+.cursorrules
+
+# PyPI credentials
+.pypirc
+~/.pypirc 
