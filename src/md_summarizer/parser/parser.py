@@ -16,61 +16,74 @@ class MarkdownParser:
         """Initialize markdown parser."""
         self.logger = logging.getLogger(__name__)
         
-    def _split_at_level(self, content: str, level: int) -> List[Section]:
-        """Split content at specified heading level."""
-        # Find all level N headings and their positions
-        positions = []
-        current_pos = 0
+    def _find_headings(self, content: str, level: int) -> List[tuple[int, str]]:
+        """Find all headings at specified level, ignoring those in code blocks."""
+        headings = []
         in_code_block = False
         
-        for line in content.splitlines():
+        for line_num, line in enumerate(content.splitlines()):
             stripped = line.strip()
             
-            # Toggle code block state
             if stripped.startswith('```'):
                 in_code_block = not in_code_block
-                current_pos += len(line) + 1
                 continue
                 
-            # Only look for headings when not in code block
             if not in_code_block:
                 heading_match = re.match(f'^#{{{level}}}\\s+(.+)$', stripped)
                 if heading_match:
-                    positions.append((current_pos, heading_match.group(1)))
-                    
-            current_pos += len(line) + 1  # +1 for newline
+                    headings.append((line_num, heading_match.group(1)))
         
-        if not positions:
-            return []
-            
-        # Split content at heading positions
+        return headings
+
+    def _split_content_at_lines(self, content: str, split_points: List[int]) -> List[str]:
+        """Split content at specified line numbers."""
+        lines = content.splitlines()
         sections = []
-        for i, (pos, title) in enumerate(positions):
-            # Get content up to next heading or end
-            next_pos = positions[i+1][0] if i < len(positions)-1 else len(content)
-            section_content = content[pos:next_pos].strip()
+        
+        for i, start in enumerate(split_points):
+            end = split_points[i + 1] if i < len(split_points) - 1 else len(lines)
+            section_lines = lines[start:end]
+            # Remove the heading line
+            section_content = '\n'.join(section_lines[1:])
+            sections.append(section_content)
             
-            # Remove the heading line from content
-            section_content = '\n'.join(section_content.splitlines()[1:])
-            
-            # Create section
+        return sections
+
+    def _split_at_level(self, content: str, level: int) -> List[Section]:
+        """Split content at specified heading level."""
+        # Find all headings at this level
+        headings = self._find_headings(content, level)
+        if not headings:
+            return []
+        
+        # Get line numbers where splits should occur
+        split_points = [pos for pos, _ in headings]
+        
+        # Split content at heading positions
+        section_contents = self._split_content_at_lines(content, split_points)
+        
+        # Validate we have matching headings and contents
+        if len(headings) != len(section_contents):
+            self.logger.error("Mismatch between headings and content sections")
+            return []
+        
+        # Create sections
+        sections = []
+        for (_, title), content in zip(headings, section_contents):
             section = Section(
                 title=title,
-                content=section_content,
+                content=content.strip(),
                 level=level
             )
             
-            # Recursively process subsections
+            # Recursively process subsections if not at max depth
             if level < 6:  # Don't process beyond h6
-                subsections = self._split_at_level(section_content, level + 1)
+                subsections = self._split_at_level(section.content, level + 1)
                 if subsections:
                     section.sections = {
                         self._make_key(s.title): s 
                         for s in subsections
                     }
-                    # Set parent reference for each subsection
-                    for subsection in section.sections.values():
-                        subsection.parent = section
                     
             sections.append(section)
             
@@ -139,13 +152,3 @@ class MarkdownParser:
             self._make_key(section.title): section
             for section in sections
         }
-
-    def _add_section(self, sections: Dict[str, Section], title: str, content: str, level: int) -> None:
-        """Add a new section to the sections dict."""
-        key = self._normalize_title(title)
-        section = Section(title=title, content=content, level=level)
-        sections[key] = section
-        
-        # Set parent for any existing child sections
-        for child in section.sections.values():
-            child.parent = section
