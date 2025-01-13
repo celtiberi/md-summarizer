@@ -32,7 +32,7 @@ service, you must make the complete source code available to users of the servic
 - Maintains document structure and headings
 - Preserves code blocks and examples
 - Concurrent section processing
-- Multiple AI provider support
+- Multiple AI provider support through pydantic_ai
 
 ## Installation
 
