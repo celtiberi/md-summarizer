@@ -1,7 +1,3 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "md_summarizer"
 version = "0.1.0"
@@ -11,13 +7,6 @@ authors = [
 ]
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = [
-    "pydantic-ai",
-    "python-dotenv",
-    "tiktoken",
-    "anthropic",
-    "transformers",
-]
 license = "AGPL-3.0"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -29,11 +18,18 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 keywords = ["markdown", "summarizer", "ai", "nlp"]
-urls = {
-    "Homepage" = "https://github.com/celtiberi/md-summarizer",
-    "Bug Tracker" = "https://github.com/celtiberi/md-summarizer/issues",
-    "Source" = "https://github.com/celtiberi/md-summarizer",
-}
+dependencies = [
+    "pydantic-ai",
+    "python-dotenv",
+    "tiktoken",
+    "anthropic",
+    "transformers",
+]
+
+[project.urls]
+Homepage = "https://github.com/celtiberi/md-summarizer"
+"Bug Tracker" = "https://github.com/celtiberi/md-summarizer/issues"
+Source = "https://github.com/celtiberi/md-summarizer"
 
 [project.optional-dependencies]
 test = [
@@ -41,6 +37,10 @@ test = [
     "pytest-asyncio",
     "pytest-watch"
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.hatch.build]
 packages = ["src/md_summarizer"]
