@@ -108,7 +108,7 @@ The default prompts are optimized for technical documentation, but you can adjus
 pip install -e ".[test]"
 
 # Run tests
-pytest -v -s --log-cli-level=INFO
+make test
 ```
 
 ## Contributing

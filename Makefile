@@ -1,6 +1,10 @@
 .PHONY: test clean build publish
 
+.PHONY: test clean build publish
+
 test:
+	pytest -v -s --log-cli-level=INFO
+
 	pytest -v -s --log-cli-level=INFO
 
 clean:
