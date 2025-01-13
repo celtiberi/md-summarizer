@@ -21,38 +21,10 @@ class Settings(BaseSettings):
     # Environment
     env: EnvironmentType = EnvironmentType.DEVELOPMENT
     
-    # OpenAI
     openai_api_key: str
-    openai_model: str = "gpt-3.5-turbo"
-    max_tokens: int = 2000
-    
-    # Markdown Parser
-    default_section_size: int = 2000
-    
-    # Logging
-    log_level: str = "INFO"
-    
-    # Add validation
-    @field_validator("max_tokens")
-    def validate_max_tokens(cls, v):
-        if v <= 0:
-            raise ValueError("max_tokens must be positive")
-        return v
-    
-    # Add more specific settings
-    openai_timeout: int = 30
-    openai_max_retries: int = 3
-    yaml_indent: int = 2
-    
-    # OpenAI specific settings
-    openai_request_timeout: int = 30
-    openai_max_tokens_per_request: int = 4000  # GPT-3.5's limit
-    
-    @field_validator("openai_max_tokens_per_request")
-    def validate_max_tokens_per_request(cls, v):
-        if v <= 0 or v > 4000:  # GPT-3.5's limit
-            raise ValueError("openai_max_tokens_per_request must be between 1 and 4000")
-        return v
+    model: str = "gpt-3.5-turbo"
+    provider: str = "openai"  # openai, anthropic, or google
+    log_level: str = "INFO"    
     
     @property
     def is_production(self) -> bool:

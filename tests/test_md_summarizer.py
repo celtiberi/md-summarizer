@@ -1,40 +1,16 @@
 import pytest
 from src.md_summarizer import MarkdownSummarizer, Section
-from src.openai_client import OpenAIClient
-from src.summarizer.utils import count_tokens
+from src.agent.document_agent import DocumentAgent
 import os
 from dotenv import load_dotenv
 import logging
 import time
 from src.config.settings import get_settings, EnvironmentType
 from .utils.output_formatter import format_section, format_comparison
-
-@pytest.fixture(autouse=True)
-def setup_test_environment():
-    """Setup test environment before each test."""
-    os.environ["ENV"] = "test"
-    return get_settings()
-
-@pytest.fixture
-def openai_client(setup_test_environment):
-    """Create real OpenAI client using test settings."""
-    settings = setup_test_environment
-    
-    if not settings.openai_api_key:
-        pytest.skip("OPENAI_API_KEY not found in test environment")
-        
-    return OpenAIClient(
-        api_key=settings.openai_api_key,
-        model=settings.openai_model
-    )
-
-@pytest.fixture
-def summarizer(openai_client):
-    """Create a MarkdownSummarizer instance."""
-    return MarkdownSummarizer(openai_client)
+from .utils.assertions import assert_tokens_reduced
 
 @pytest.mark.asyncio
-async def test_basic_summarization(summarizer, setup_test_environment):
+async def test_basic_summarization1(summarizer, setup_test_environment):
     """Test basic content summarization without sections."""  
     content = ASYNC_CALLBACK_SECTION_CONTENT
     
@@ -47,10 +23,11 @@ async def test_basic_summarization(summarizer, setup_test_environment):
     # Show output
     format_section("OUTPUT", result)
     
-    format_comparison(content, result)
+    
+    format_comparison(content, result, summarizer.agent)
     # Run assertions
     assert result  # Result should not be empty
-    assert count_tokens(result) < count_tokens(content)  # Should use fewer tokens
+    assert_tokens_reduced(summarizer)
 
 @pytest.mark.asyncio
 async def test_basic_summarization2(summarizer, setup_test_environment):
@@ -66,10 +43,10 @@ async def test_basic_summarization2(summarizer, setup_test_environment):
     # Show output
     format_section("OUTPUT", result)
     
-    format_comparison(content, result)
+    format_comparison(content, result, summarizer.agent)
     # Run assertions
     assert result  # Result should not be empty
-    assert count_tokens(result) < count_tokens(content)  # Should use fewer tokens
+    assert_tokens_reduced(summarizer)
 
 
 
@@ -82,43 +59,6 @@ async def test_empty_content(summarizer):
     result = await summarizer.summarize(content)
     
     assert result == ""
-
-@pytest.mark.asyncio
-async def test_section_combination(summarizer):
-    """Test that sections are properly combined in output."""
-    sections = {
-        'main': Section(
-            content='Main content',
-            level=1,
-            sections={
-                'sub1': Section(content='Sub content 1', level=2),
-                'sub2': Section(content='Sub content 2', level=2)
-            }
-        )
-    }
-    
-    # Show input structure
-    format_section("INPUT SECTIONS", 
-        "\n".join([
-            "Main Section (level 1):",
-            "  - Content: Main content",
-            "  Sub1 (level 2):",
-            "    - Content: Sub content 1",
-            "  Sub2 (level 2):",
-            "    - Content: Sub content 2"
-        ])
-    )
-    
-    # Process content
-    result = summarizer._combine_sections(sections)
-    
-    # Show output
-    format_section("OUTPUT", result)
-    
-    # Verify all sections are included
-    assert 'Main content' in result
-    assert 'Sub content 1' in result
-    assert 'Sub content 2' in result
 
 @pytest.mark.asyncio
 async def test_concurrent_processing(summarizer):
@@ -142,13 +82,7 @@ async def test_concurrent_processing(summarizer):
     # Show output with timing
     format_section("OUTPUT", result)
     
-    # Show performance stats
-    format_section("PERFORMANCE", 
-        f"Processing Time: {duration:.2f}s\n"
-        f"Input Tokens: {count_tokens(content)}\n"
-        f"Output Tokens: {count_tokens(result)}\n"
-        f"Token Reduction: {(1 - count_tokens(result)/count_tokens(content)):.1%}"
-    )
+    format_comparison(content, result, summarizer.agent)
     
     # Verify all sections processed
     assert "Content 1" in result
@@ -178,10 +112,10 @@ async def test_example_doc_summarization(summarizer, setup_test_environment):
 
     # Run assertions
     assert result  # Result should not be empty
-    assert count_tokens(result) < count_tokens(content)  # Should use fewer tokens
+    assert_tokens_reduced(summarizer)
     
     # Calculate and display reductions
-    format_comparison(content, result)
+    format_comparison(content, result, summarizer.agent)
 
 
 

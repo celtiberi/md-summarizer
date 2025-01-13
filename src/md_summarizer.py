@@ -1,32 +1,38 @@
 from typing import Dict, List
 import logging
 import asyncio
-import re
+from pydantic_ai.usage import Usage
 
-from .openai_client import OpenAIClient 
+from src.agent.document_agent import DocumentAgent
 from .md_parser import MarkdownParser, Section
 
 class MarkdownSummarizer:
     """Summarizes markdown content by recursively processing sections."""
     
-    def __init__(self, openai_client: OpenAIClient):
-        """Initialize summarizer with OpenAI client."""
-        self.openai_client = openai_client
+    def __init__(self, agent: DocumentAgent):
+        """Initialize summarizer with document agent."""
+        self.agent = agent
         self.logger = logging.getLogger(__name__)
         self.parser = MarkdownParser()
 
+    def usage(self) -> Usage:
+        """Return usage statistics."""
+        return self.agent.usage
+    
     async def summarize(self, content: str) -> str:
         """Summarize markdown content while preserving structure."""
-        self.logger.info("Parsing content into sections...")
+        self.logger.info("[MarkdownSummarizer] Parsing content into sections...")
         sections = self.parser.parse(content)
-        self.logger.info(f"Found sections: {list(sections.keys())}")
+        self.logger.info(f"[MarkdownSummarizer] Found sections: {list(sections.keys())}")
         
         processed = await self._process_sections(sections)
+
+        self.logger.info(f"[MarkdownSummarizer] Successfully processed {len(processed)} sections")
         return self._combine_sections(processed)
 
     async def _process_sections(self, sections: Dict[str, Section]) -> Dict[str, Section]:
         """Process all sections concurrently."""
-        self.logger.info(f"Processing {len(sections)} sections: {list(sections.keys())}")
+        self.logger.info(f"[MarkdownSummarizer] Processing {len(sections)} sections: {list(sections.keys())}")
         tasks = [
             self._process_section(key, section)
             for key, section in sections.items()
@@ -36,11 +42,11 @@ class MarkdownSummarizer:
 
     async def _process_section(self, name: str, section: Section) -> Section:
         """Process a section of content."""
-        self.logger.info(f"Processing section '{name}' (level {section.level})")
+        self.logger.info(f"[MarkdownSummarizer] Processing section '{name}' (level {section.level})")
         
         # First process any child sections
         if section.sections:
-            self.logger.info(f"Processing {len(section.sections)} sections: {list(section.sections.keys())}")
+            self.logger.debug(f"[MarkdownSummarizer] Processing {len(section.sections)} sections: {list(section.sections.keys())}")
             # Process all child sections in parallel
             child_tasks = [
                 self._process_section(child_name, child)
@@ -54,14 +60,11 @@ class MarkdownSummarizer:
         
         # Then summarize this section's content
         if section.content:
-            self.logger.info(f"Summarizing section '{name}' ({len(section.content)} chars)")
-            child_summaries = [c.content for c in processed_children] if processed_children else None
-            section.content = await self.openai_client.summarize_section(
-                section.content, 
-                section.level,
-                child_summaries
+            self.logger.debug(f"[MarkdownSummarizer] Summarizing section '{name}' ({len(section.content)} chars)")
+            section.content = await self.agent.summarize_section(
+                section.content
             )
-            self.logger.info(f"Section '{name}' summarized: {len(section.content)} chars")
+            self.logger.debug(f"[MarkdownSummarizer] Section '{name}' summarized: {len(section.content)} chars")
         
         section.sections = processed_children_dict
         return section

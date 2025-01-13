@@ -5,8 +5,7 @@ import logging
 from pathlib import Path
 from src.config.settings import get_settings
 from src.md_summarizer import MarkdownSummarizer
-from src.summarizer.utils import count_tokens
-from src.openai_client import OpenAIClient
+from src.document_agent import DocumentAgent, BaseAgent
 
 # Configure logging
 logging.basicConfig(
@@ -28,24 +27,16 @@ async def main():
     settings = get_settings()
     
     # Initialize client once with model
-    client = OpenAIClient(settings.openai_api_key, model=settings.openai_model)
+    agent = DocumentAgent()
     print(f"\nUsing model: {settings.openai_model}")
-    print(f"Max tokens: {client._get_model_context_length(settings.openai_model)}\n")
     
-    if args.list_models:
-        models = await client.list_available_models()
-        print("\nAvailable GPT Models:")
-        for model in models:
-            print(f"\n{model['id']}:")
-            print(f"  Max Tokens: {model['max_tokens']}")
-        return
     
     # Require input/output for conversion
     if not args.input or not args.output:
         parser.error("--input and --output are required for conversion")
     
     # Initialize converter with same client
-    converter = MarkdownSummarizer(client)
+    converter = MarkdownSummarizer(agent)
     
     # Read input file
     input_path = Path(args.input)
@@ -55,12 +46,12 @@ async def main():
     input_content = input_path.read_text()
     
     # Count tokens with correct model
-    input_tokens = count_tokens(input_content, model=settings.openai_model)
+    input_tokens = BaseAgent.count_tokens(input_content)
     print(f"Input document tokens: {input_tokens}")
     
     # Convert content
     yaml_content = await converter.summarize(input_content)
-    output_tokens = count_tokens(yaml_content, model=settings.openai_model)
+    output_tokens = BaseAgent.count_tokens(yaml_content)
     print(f"Output document tokens: {output_tokens}")
     print(f"Token reduction: {((input_tokens - output_tokens) / input_tokens * 100):.1f}%\n")
     
@@ -71,6 +62,7 @@ async def main():
     
     if args.verbose:
         print(f"Converted {args.input} to {args.output}")
+        print(f"Total tokens used: {agent.usage.total_tokens}")
 
 if __name__ == "__main__":
     asyncio.run(main()) 

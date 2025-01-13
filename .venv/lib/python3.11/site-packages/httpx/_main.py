@@ -6,6 +6,7 @@ import sys
 import typing
 
 import click
+import httpcore
 import pygments.lexers
 import pygments.util
 import rich.console
@@ -18,9 +19,6 @@ from ._client import Client
 from ._exceptions import RequestError
 from ._models import Response
 from ._status_codes import codes
-
-if typing.TYPE_CHECKING:
-    import httpcore  # pragma: no cover
 
 
 def print_help() -> None:
@@ -476,7 +474,12 @@ def main(
         method = "POST" if content or data or files or json else "GET"
 
     try:
-        with Client(proxy=proxy, timeout=timeout, http2=http2, verify=verify) as client:
+        with Client(
+            proxy=proxy,
+            timeout=timeout,
+            verify=verify,
+            http2=http2,
+        ) as client:
             with client.stream(
                 method,
                 url,

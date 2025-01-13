@@ -1,6 +1,7 @@
 """Test output formatting utilities."""
-from src.summarizer.utils import count_tokens
 from src.config.settings import get_settings
+from pydantic_ai.usage import Usage
+from src.agent.document_agent import DocumentAgent
 
 star_count = 30
 
@@ -15,27 +16,15 @@ def format_section(title: str, content: str) -> None:
     # Content
     print(f"{content}\n")
     
-def print_stats(content: str) -> None:
-    """Print statistics about the content."""
-    print("Statistics:")
-    print("-"*20)
-    print(f"{'Length':<20}: {len(content)}")
-    print(f"{'Tokens':<20}: {count_tokens(content)}")
-    print(f"{'Model':<20}: {get_settings().openai_model}")
-
-def format_comparison(input_text: str, output_text: str) -> None:
+def format_comparison(input_text: str, output_text: str, agent: DocumentAgent) -> None:
     """Format input/output comparison with auto-generated stats."""
-    # Show input
-    format_section("INPUT", input_text)
-    
-    # Show output with reduction stats
-    format_section("OUTPUT", output_text)
-    
     # Show reductions
-    input_tokens = count_tokens(input_text)
-    output_tokens = count_tokens(output_text)
+    input_tokens = agent.usage.request_tokens
+    output_tokens = agent.usage.response_tokens
+
     print("\n" + "⭐️"*star_count)
     print("\nReductions:")
     print("-"*20)
-    print(f"{'Tokens':<20}: {(1 - output_tokens/input_tokens):.1%}")
-    print(f"{'Length':<20}: {(1 - len(output_text)/len(input_text)):.1%}") 
+    print(f"{'Input Tokens':<20}: {input_tokens}")
+    print(f"{'Output Tokens':<20}: {output_tokens}")
+    print(f"{'Tokens Reduction':<20}: {(1 - output_tokens/input_tokens):.1%}")

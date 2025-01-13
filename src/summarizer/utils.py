@@ -3,7 +3,6 @@
 from typing import List
 from .types import APIInfo
 import re
-from tiktoken import encoding_for_model, get_encoding
 
 def format_api_info(api_info: APIInfo) -> str:
     """Format API info into a string."""
@@ -31,22 +30,3 @@ def normalize_header_levels(content: str, level: int) -> str:
     """Ensure all headers are at the specified level."""
     header_marker = '#' * level
     return re.sub(r'^#{1,6}\s', f'{header_marker} ', content, flags=re.MULTILINE) 
-
-def count_tokens(text: str, model: str = "gpt-3.5-turbo") -> int:
-    """Count tokens using OpenAI's tiktoken library.
-    
-    Args:
-        text: The text to count tokens for
-        model: The model to use for counting tokens (default: gpt-3.5-turbo)
-        
-    Returns:
-        Number of tokens in the text
-    """
-    try:
-        # Try to get encoding for specific model
-        encoding = encoding_for_model(model)
-    except KeyError:
-        # Fallback to cl100k_base for unknown models
-        encoding = get_encoding("cl100k_base")
-    
-    return len(encoding.encode(text)) 
