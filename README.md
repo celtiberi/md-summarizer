@@ -74,6 +74,40 @@ LOG_LEVEL=INFO           # Logging level
 
 See `.env.example` for all available configuration options.
 
+## Custom Prompts
+
+You can customize the prompts used for summarization by creating your own DocumentAgent:
+
+```python
+from md_summarizer import MarkdownSummarizer, DocumentAgent
+
+# Define custom prompts
+system_prompt = """You are an expert at summarizing technical documentation.
+Focus on preserving:
+- Code examples and their context
+- Key technical details
+- Important concepts
+Aim to reduce token count while maintaining technical accuracy."""
+
+user_prompt = """Summarize this section while preserving code blocks and technical details:
+
+{content}"""
+
+# Create agent with custom prompts
+agent = DocumentAgent(
+    system_prompt=system_prompt,
+    user_prompt=user_prompt
+)
+
+# Initialize summarizer with custom agent
+summarizer = MarkdownSummarizer(agent=agent)
+
+# Use as normal
+result = await summarizer.summarize(content)
+```
+
+The default prompts are optimized for technical documentation, but you can adjust them for different types of content or specific requirements.
+
 ## Development
 
 ```bash
@@ -81,10 +115,7 @@ See `.env.example` for all available configuration options.
 pip install -e ".[test]"
 
 # Run tests
-pytest
-
-# Run specific test
-make test-case TEST=test_name
+pytest -v -s --log-cli-level=INFO
 ```
 
 ## Contributing
@@ -115,3 +146,25 @@ This means that:
 - Changes you make must use the same license
 - Changes you make must be made available when you distribute the software
 - If you use this software in a network 
+
+## Customization
+
+### Custom Prompts
+
+You can customize the prompts used for summarization:
+
+```python
+from md_summarizer import MarkdownSummarizer
+
+summarizer = MarkdownSummarizer()
+
+# View current prompts
+print(summarizer.system_prompt)
+print(summarizer.user_prompt)
+
+# Set custom prompts
+summarizer.system_prompt = """Your custom system prompt..."""
+summarizer.user_prompt = """Your custom section prompt..."""
+```
+
+The default prompts are optimized for technical documentation, but you can adjust them for different content types. 

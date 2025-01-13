@@ -94,3 +94,23 @@ class MarkdownSummarizer:
         # Filter out empty strings but keep separators
         filtered_parts = [p for p in content_parts if p.strip()]
         return '\n\n'.join(filtered_parts)
+
+    @property
+    def system_prompt(self) -> str:
+        """Get the current system prompt."""
+        return self.agent.system_prompt
+
+    @system_prompt.setter
+    def system_prompt(self, prompt: str):
+        """Set a custom system prompt."""
+        self.agent.system_prompt = prompt
+
+    @property
+    def user_prompt(self) -> str:
+        """Get the current user prompt template."""
+        return self.agent.user_prompt
+
+    @user_prompt.setter
+    def user_prompt(self, prompt: str):
+        """Set a custom user prompt template."""
+        self.agent.user_prompt = prompt
