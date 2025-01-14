@@ -49,20 +49,25 @@ def get_settings() -> Settings:
     """Get cached settings instance."""
     # Check for ENV, default to using .env if not set
     env = os.getenv("ENV")
+    env_type = EnvironmentType.DEVELOPMENT
     
     if env:
         # Use environment-specific file (.env.development, .env.test, etc)
         env_type = EnvironmentType(env)
         env_file = os.path.join(PROJECT_ROOT, f".env.{env_type.value}")
+        # Fall back to .env if environment-specific file doesn't exist
+        if not os.path.exists(env_file):
+            env_file = os.path.join(os.getcwd(), ".env")
     else:
-        # Default to .env
-        env_file = os.path.join(PROJECT_ROOT, ".env")
-        env_type = EnvironmentType.DEVELOPMENT
+        # Default to .env in current directory
+        env_file = os.path.join(os.getcwd(), ".env")
     
     # Load environment file
     if os.path.exists(env_file):
         load_dotenv(env_file, override=True)
     else:
-        raise FileNotFoundError(f"Environment file not found: {env_file}")
+        # Log warning but don't fail - environment variables might be set directly
+        import logging
+        logging.warning(f"Environment file not found: {env_file}")
     
     return Settings(env=env_type) 
