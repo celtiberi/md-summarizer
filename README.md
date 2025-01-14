@@ -67,6 +67,19 @@ LOG_LEVEL=INFO           # Logging level
 
 See `.env.example` for all available configuration options.
 
+## Roadmap
+
+Future features planned for MD Summarizer:
+
+### Remote Document Support
+- Fetch Markdown from URLs directly
+
+### Multi-Document Features
+- Combine multiple documents into a single summary
+- Bulk processing of entire `/docs` directories
+
+Want to contribute to these features? Check out our [Contributing](#contributing) guide!
+
 ## Custom Prompts
 
 You can customize the prompts used for summarization by creating your own DocumentAgent:
