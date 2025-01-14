@@ -1,9 +1,13 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "md_summarizer"
-version = "0.1.0"
+version = "0.1.31"
 description = "AI-powered Markdown summarizer that preserves structure and code blocks"
 authors = [
-    { name = "Patrick Cremin" }
+    { name = "Celtiberi" }
 ]
 readme = "README.md"
 requires-python = ">=3.9"
@@ -19,11 +23,11 @@ classifiers = [
 ]
 keywords = ["markdown", "summarizer", "ai", "nlp"]
 dependencies = [
-    "pydantic-ai",
-    "python-dotenv",
-    "tiktoken",
-    "anthropic",
-    "transformers",
+    "pydantic-ai>=0.0.18",
+    "python-dotenv>=1.0.0",
+    "tiktoken>=0.5.0",
+    "anthropic>=0.3.0",
+    "transformers>=4.30.0"
 ]
 
 [project.urls]
@@ -33,17 +37,10 @@ Source = "https://github.com/celtiberi/md-summarizer"
 
 [project.optional-dependencies]
 test = [
-    "pytest",
-    "pytest-asyncio",
-    "pytest-watch"
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-watch>=4.2.0"
 ]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build]
-packages = ["src/md_summarizer"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

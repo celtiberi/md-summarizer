@@ -3,6 +3,8 @@
 .env.*
 !.env.example
 
+.pypirc
+
 # Python
 __pycache__/
 *.py[cod]
@@ -25,7 +27,7 @@ build/
 # Testing
 .pytest_cache/
 .coverage
-htmlcov/ 
+htmlcov/
 
 # System files
 .DS_Store

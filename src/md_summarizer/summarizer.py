@@ -3,8 +3,8 @@ import logging
 import asyncio
 from pydantic_ai.usage import Usage
 
-from ..agent import DocumentAgent
-from ..parser import MarkdownParser, Section
+from .agent import DocumentAgent
+from .parser import MarkdownParser, Section
 
 class MarkdownSummarizer:
     """Summarizes markdown content by recursively processing sections."""
