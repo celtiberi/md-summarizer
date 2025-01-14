@@ -44,3 +44,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 packages = ["src/md_summarizer"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "asyncio: mark a test as an async test",
+]
+addopts = "--asyncio-mode=auto"
