@@ -2,6 +2,7 @@ import pytest
 from .utils.output_formatter import format_section, format_comparison
 from .utils.assertions import assert_tokens_reduced
 from md_summarizer import MarkdownSummarizer, ProgressStatus
+import asyncio
 
 @pytest.mark.asyncio
 async def test_basic_summarization1(summarizer, setup_test_environment):
@@ -83,57 +84,50 @@ async def test_example_doc_summarization(summarizer, setup_test_environment):
     format_comparison(content, result, summarizer.agent)
 
 @pytest.mark.asyncio
-async def test_streaming_updates(summarizer, setup_test_environment):
-    """Test streaming progress updates during summarization."""
-    content = """
-# Test Document
-
-## Section 1
-This is some test content.
-
-## Section 2
-More test content here.
-
-### Subsection 2.1
-Even more content.
-"""
+async def test_streaming_updates():
+    """Test streaming updates from summarizer."""
+    content = NODE_GYP_CONTENT
+    summarizer = MarkdownSummarizer()
     
+    # Track updates
     updates = []
+    section_count = 0
+    total_sections = None
     
     print("\n🔄 Streaming Updates:")
     print("-" * 50)
     
     async for update in summarizer.stream(content):
         updates.append(update)
-        print(f"Status: {update.status}", end="")
         if update.status == ProgressStatus.STARTING:
-            print(f", Total Sections: {update.total_sections}")
+            print(f"\nStatus: {update.status}, Total Sections: {update.total_sections}")
+            # Verify we got total sections count
+            total_sections = update.total_sections
+            assert total_sections > 0
         elif update.status == ProgressStatus.SECTION_COMPLETE:
-            print(f", Section: {update.section_title}")
-        print()
-        
-        # Verify update sequence
-        if update.status == ProgressStatus.STARTING:
-            total = update.total_sections
-            section_count = 0
-        elif update.status == ProgressStatus.SECTION_COMPLETE:
-            section_count += 1
-            assert section_count <= total
-            # Verify section title is present
+            print(f"\nStatus: {update.status}, Section: {update.section_title}")
+            # Verify section title exists
             assert update.section_title is not None
-            assert update.section_title in ["Test Document", "Section 1", "Section 2", "Subsection 2.1"]
+            section_count += 1
         elif update.status == ProgressStatus.COMPLETE:
-            assert section_count == total
-        
-        # Store final content
-        if update.status == ProgressStatus.COMPLETE:
-            final_content = update.content
+            print(f"\nStatus: {update.status}")
+            print(update.content)
+            # Verify final content
+            assert update.content is not None
+            assert len(update.content) > 0
+            # Verify we processed all sections
+            assert section_count == total_sections
+        elif update.status == ProgressStatus.ERROR:
+            print(f"\nStatus: {update.status}")
+            pytest.fail(f"Unexpected error: {update.error}")
     
-    print(f"Final content: \n\n{final_content}")
+    # Verify update sequence
+    assert len(updates) > 0
+    assert updates[0].status == ProgressStatus.STARTING
+    assert updates[-1].status == ProgressStatus.COMPLETE
     
-    # Verify final content exists
-    assert final_content is not None
-    assert len(final_content) > 0
+    # Verify token reduction
+    assert_tokens_reduced(summarizer)
 
 
 

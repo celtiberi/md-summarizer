@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "md_summarizer"
-version = "0.1.56"
+version = "0.1.57"
 description = "AI-powered Markdown summarizer that preserves structure and code blocks"
 authors = [
     { name = "Celtiberi" }
@@ -48,4 +48,3 @@ asyncio_default_fixture_loop_scope = "function"
 markers = [
     "asyncio: mark a test as an async test",
 ]
-addopts = "--asyncio-mode=auto"
