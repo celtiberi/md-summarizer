@@ -1,31 +1,56 @@
-# MD Summarizer
+# Markdown Summarizer
 
-An AI-powered tool that reduces the token size of Markdown documents while preserving their essential structure, code blocks, and meaning. Designed to help fit documentation into AI context windows without losing critical information, code examples, or document organization.
+An AI-powered tool that reduces the token size of Markdown documents while preserving their essential structure, code blocks, and meaning. Designed to help fit documentation into AI context windows without losing critical information.
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![PyPI version](https://badge.fury.io/py/md-summarizer.svg)](https://badge.fury.io/py/md-summarizer)
-[![GitHub issues](https://img.shields.io/github/issues/celtiberi/md-summarizer)](https://github.com/celtiberi/md-summarizer/issues)
+## Features
 
-## Key Features
+- **Token Reduction**: Intelligently reduces document size
+- Preserves markdown heading hierarchy
+- Protects code blocks and technical details
+- Bottom-up concurrent processing
+- Real-time progress updates
+- Streaming API
+- Multiple AI provider support
 
-- **Token Reduction**: Intelligently reduces document size to minimize token usage
-- **Structure Preservation**: Maintains document hierarchy and essential content
-- **Code Block Protection**: Preserves critical code examples and technical details
-- **Token Tracking**: Built-in monitoring of input/output token usage
-- **Multiple AI Support**: Works with OpenAI, Anthropic, and other providers
-- **Parallel Processing**: Fast processing through concurrent section handling
+## Usage
 
-## Why Use MD Summarizer?
+```python
+from md_summarizer import MarkdownSummarizer, ProgressStatus
 
-- **Fit More Context**: Process larger documents that would exceed AI token limits
-- **Keep What Matters**: Smart summarization preserves important technical details
-- **Save Costs**: Reduce token usage while maintaining document quality
+# Basic usage
+summarizer = MarkdownSummarizer()
+result = await summarizer.summarize(content)
 
-## Repository
+# Streaming updates
+async for update in summarizer.stream(content):
+    if update.status == ProgressStatus.STARTING:
+        print(f"Processing {update.total_sections} sections...")
+    elif update.status == ProgressStatus.SECTION_COMPLETE:
+        print(f"Completed section: {update.section_title}")
+    elif update.status == ProgressStatus.COMPLETE:
+        print("Done!")
+        print(update.content)
 
-- Source Code: [https://github.com/celtiberi/md-summarizer](https://github.com/celtiberi/md-summarizer)
-- Issue Tracker: [https://github.com/celtiberi/md-summarizer/issues](https://github.com/celtiberi/md-summarizer/issues)
-service, you must make the complete source code available to users of the service
+# Progress update types:
+# - ProgressStatus.STARTING: total_sections count
+# - ProgressStatus.SECTION_COMPLETE: section_title of completed section
+# - ProgressStatus.COMPLETE: final content
+# - ProgressStatus.ERROR: error details if something fails
+
+# Customize prompts
+summarizer.system_prompt = "Your custom system prompt"
+summarizer.user_prompt = "Your custom user prompt"
+```
+
+Example output:
+```
+Status: ProgressStatus.STARTING, Total Sections: 4
+Status: ProgressStatus.SECTION_COMPLETE, Section: Subsection 2.1
+Status: ProgressStatus.SECTION_COMPLETE, Section: Section 1
+Status: ProgressStatus.SECTION_COMPLETE, Section: Section 2
+Status: ProgressStatus.SECTION_COMPLETE, Section: Test Document
+Status: ProgressStatus.COMPLETE
+```
 
 ## Installation
 
@@ -33,109 +58,23 @@ service, you must make the complete source code available to users of the servic
 pip install md-summarizer
 ```
 
-## Usage
-
-Basic usage:
-```python
-from md_summarizer import MarkdownSummarizer, ProgressStatus
-
-async def main():
-    summarizer = MarkdownSummarizer()
-    
-    # Basic usage - get final result
-    result = await summarizer.summarize(content)
-    print(result)
-    
-    # Streaming usage - get progress updates
-    async for update in summarizer.summarize(content):
-        if update.status == ProgressStatus.PROCESSING:
-            print(f"Processing section: {update.section} ({update.progress:.0f}%)")
-        elif update.status == ProgressStatus.COMPLETE:
-            print(f"Final summary:\n{update.content}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-Progress updates include:
-- status: ProgressStatus enum (STARTING, PARSING, PROCESSING, COMPLETE)
-- progress: 0-100 percentage complete
-- section: Current section being processed (during "processing" status)
-- content: Final summarized text (only in "complete" status)
-
-Example output:
-```
-Starting summarization...
-Processing section: Introduction (20%)
-Processing section: API Reference (45%)
-Processing section: Examples (70%)
-Final summary:
-# Document Summary
-...
-```
-
 ## Configuration
 
-Copy `.env.example` to `.env` and configure your environment variables:
-```bash
-# Required
-OPENAI_API_KEY=your-api-key
-ANTHROPIC_API_KEY=your-anthropic-api-key  # If using Anthropic
-
-# Optional
-MODEL=gpt-4-turbo-preview  # Default model
-PROVIDER=openai           # AI provider (openai, anthropic, google)
-LOG_LEVEL=INFO           # Logging level
+Set environment variables or use .env file:
+```
+OPENAI_API_KEY=your-key
+MODEL=gpt-3.5-turbo
+PROVIDER=openai
+LOG_LEVEL=INFO
 ```
 
-See `.env.example` for all available configuration options.
+## How it Works
 
-## Roadmap
-
-Future features planned for MD Summarizer:
-
-### Remote Document Support
-- Fetch Markdown from URLs directly
-
-### Multi-Document Features
-- Combine multiple documents into a single summary
-- Bulk processing of entire `/docs` directories
-
-Want to contribute to these features? Check out our [Contributing](#contributing) guide!
-
-## Custom Prompts
-
-You can customize the prompts used for summarization by creating your own DocumentAgent:
-
-```python
-from md_summarizer import MarkdownSummarizer, DocumentAgent
-
-# Define custom prompts
-system_prompt = """You are an expert at summarizing technical documentation.
-Focus on preserving:
-- Code examples and their context
-- Key technical details
-- Important concepts
-Aim to reduce token count while maintaining technical accuracy."""
-
-user_prompt = """Summarize this section while preserving code blocks and technical details:
-
-{content}"""
-
-# Create agent with custom prompts
-agent = DocumentAgent(
-    system_prompt=system_prompt,
-    user_prompt=user_prompt
-)
-
-# Initialize summarizer with custom agent
-summarizer = MarkdownSummarizer(agent=agent)
-
-# Use as normal
-result = await summarizer.summarize(content)
-```
-
-The default prompts are optimized for technical documentation, but you can adjust them for different types of content or specific requirements.
+1. Parses markdown into hierarchical sections
+2. Processes sections bottom-up (children before parents)
+3. Preserves heading levels and structure
+4. Provides real-time progress updates
+5. Combines processed sections into final document
 
 ## Development
 
@@ -149,29 +88,8 @@ make test
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-Please make sure to update tests as appropriate.
-
-Repository: [https://github.com/celtiberi/md-summarizer](https://github.com/celtiberi/md-summarizer)
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first.
 
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-This means that:
-- You can use this software for any purpose
-- You can modify this software
-- You can distribute this software
-- You must include the license and copyright notice with each and every distribution
-- You must include the source code of any derivative works you distribute
-- Changes you make must be documented
-- Changes you make must use the same license
-- Changes you make must be made available when you distribute the software
-- If you use this software in a network 
