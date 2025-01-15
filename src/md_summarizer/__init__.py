@@ -4,7 +4,7 @@ from .core.summarizer import (
     ProgressStatus,
     ProgressUpdate
 )
-from .models import DocumentAgent
+from .agent import DocumentAgent
 from .parser import MarkdownParser
 
 __all__ = [
