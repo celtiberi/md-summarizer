@@ -20,14 +20,15 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance."""
-    env_file = os.path.join(os.getcwd(), ".env")
+    possible_paths = [
+        os.path.join(os.getcwd(), ".env"),
+        os.path.join(os.path.dirname(__file__), "../..", ".env")
+    ]
     
-    # Load environment file
-    if os.path.exists(env_file):
-        load_dotenv(env_file, override=True)
-    else:
-        # Log warning but don't fail - environment variables might be set directly
-        import logging
-        logging.warning(f"Environment file not found: {env_file}")
+    # Try each possible path
+    for env_file in possible_paths:
+        if os.path.exists(env_file):
+            load_dotenv(env_file, override=True)
+            break
     
     return Settings() 
