@@ -1,5 +1,5 @@
 """Test output formatting utilities."""
-from md_summarizer.agent import DocumentAgent
+from md_summarizer.agent import SummarizerAgent
 
 star_count = 30
 
@@ -14,7 +14,7 @@ def format_section(title: str, content: str) -> None:
     # Content
     print(f"{content}\n")
     
-def format_comparison(input_text: str, output_text: str, agent: DocumentAgent) -> None:
+def format_comparison(input_text: str, output_text: str, agent: SummarizerAgent) -> None:
     """Format input/output comparison with auto-generated stats."""
     # Show reductions
     input_tokens = agent.usage.request_tokens

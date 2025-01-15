@@ -10,8 +10,8 @@ class SummarizeResult(BaseModel):
     """Result of summarization."""
     content: str
 
-class DocumentAgent:
-    """Agent for summarizing markdown documents."""
+class SummarizerAgent:
+    """Agent for summarizing text content using AI."""
     
     def __init__(self, system_prompt: Optional[str] = None, user_prompt: Optional[str] = None):
         """Initialize with API key and model."""
@@ -95,8 +95,11 @@ class DocumentAgent:
         self._user_prompt = prompt
         self.document_prompt_tokens = self._count_tokens_openai(prompt)
 
-    async def summarize_section(self, content: str) -> str:
-        """Summarize a section of content."""
+    async def run(self, content: str) -> str:
+        """Run the agent and update usage statistics."""
+        if not content.strip():
+            return content
+            
         # Use the custom user prompt
         user_prompt = self._user_prompt + "\n\n" + content
         

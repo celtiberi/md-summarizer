@@ -9,7 +9,7 @@ import logging
 import asyncio
 from pydantic_ai.usage import Usage
 
-from ..agent import DocumentAgent
+from ..agent import SummarizerAgent
 from ..parser import MarkdownParser
 from ..models import Section
 from ..progress.models import ProgressStatus, ProgressUpdate
@@ -22,10 +22,10 @@ logger = logging.getLogger(__name__)
 class MarkdownSummarizer:
     """Summarizes markdown content by recursively processing sections."""
     
-    def __init__(self, agent: Optional[DocumentAgent] = None):
-        """Initialize summarizer with document agent.
+    def __init__(self, agent: Optional[SummarizerAgent] = None):
+        """Initialize summarizer with AI agent.
         """
-        self.agent = agent or DocumentAgent()
+        self.agent = agent or SummarizerAgent()
         self.parser = MarkdownParser()
 
     def usage(self) -> Usage:

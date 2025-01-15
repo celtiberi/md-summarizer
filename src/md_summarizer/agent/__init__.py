@@ -1,6 +1,6 @@
 """Agent functionality for document processing."""
-from .document_agent import DocumentAgent
+from .summarizer_agent import SummarizerAgent
 
 __all__ = [
-    "DocumentAgent"
+    "SummarizerAgent"
 ] 

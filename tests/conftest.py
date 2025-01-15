@@ -1,7 +1,7 @@
 import pytest
 import os
 from md_summarizer import MarkdownSummarizer, MarkdownParser
-from md_summarizer.agent import DocumentAgent
+from md_summarizer.agent import SummarizerAgent
 import logging
 
 @pytest.fixture(scope="session", autouse=True)
@@ -30,7 +30,7 @@ def parser():
 @pytest.fixture
 async def agent():
     """Create Agent for testing."""
-    return DocumentAgent()
+    return SummarizerAgent()
 
 @pytest.fixture
 def summarizer(setup_test_environment):
@@ -44,7 +44,7 @@ def summarizer(setup_test_environment):
         MarkdownToYamlConverter: Test configuration
     """
     
-    return MarkdownSummarizer(agent=DocumentAgent())
+    return MarkdownSummarizer(agent=SummarizerAgent())
 
 @pytest.fixture(autouse=True)
 def setup_logging(setup_test_environment):

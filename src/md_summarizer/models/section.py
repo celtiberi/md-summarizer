@@ -1,5 +1,5 @@
 from typing import Dict
-from ..agent import DocumentAgent
+from ..agent import SummarizerAgent
 from ..common.signals import section_complete
 from dataclasses import dataclass, field
 import asyncio
@@ -16,7 +16,7 @@ class Section:
     ROOT_LEVEL = 1
     IMPORTANT_LEVEL = 2
     
-    async def process(self, agent: DocumentAgent) -> None:
+    async def process(self, agent: SummarizerAgent) -> None:
         """Process section content recursively."""
         # Process subsections first
         tasks = [
@@ -27,7 +27,7 @@ class Section:
             await asyncio.gather(*tasks)
         
         # Then process this section
-        self.content = await agent.summarize_section(self.content)
+        self.content = await agent.run(self.content)
         section_complete.send(self, section_title=self.title)
         
     def combine(self) -> str:

@@ -4,13 +4,13 @@ from .core.summarizer import (
     ProgressStatus,
     ProgressUpdate
 )
-from .agent import DocumentAgent
+from .agent import SummarizerAgent
 from .parser import MarkdownParser
 
 __all__ = [
     'MarkdownSummarizer',
     'ProgressStatus',
     'ProgressUpdate',
-    'DocumentAgent',
+    'SummarizerAgent',
     'MarkdownParser'
 ]
