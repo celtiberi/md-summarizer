@@ -17,9 +17,16 @@ build: clean bump-version
 	python -m build
 	twine check dist/*
 
-publish: build
+publish-test: build
 	python -m twine upload --repository testpypi dist/* --non-interactive 
+
+publish: build
+	python -m twine upload dist/* --verbose
+
+release-test: publish-test
+	twine upload dist/*
+	@echo "Released test version $(shell python -c "from pathlib import Path; import re; match = re.search(r'version = \"(\d+\.\d+\.\d+)\"', Path('pyproject.toml').read_text()); print(match.group(1) if match else 'unknown')")" 
 
 release: publish
 	twine upload dist/*
-	@echo "Released version $(shell python -c "from pathlib import Path; import re; match = re.search(r'version = \"(\d+\.\d+\.\d+)\"', Path('pyproject.toml').read_text()); print(match.group(1) if match else 'unknown')")" 
+	@echo "Released version $(shell python -c "from pathlib import Path; import re; match = re.search(r'version = \"(\d+\.\d+\.\d+)\"', Path('pyproject.toml').read_text()); print(match.group(1) if match else 'unknown')")"
