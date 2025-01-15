@@ -1,10 +1,16 @@
-"""
-MD Summarizer - AI-powered Markdown summarizer that preserves structure and code blocks.
-"""
+"""Markdown summarization package."""
+from .core.summarizer import (
+    MarkdownSummarizer,
+    ProgressStatus,
+    ProgressUpdate
+)
+from .models import DocumentAgent
+from .parser import MarkdownParser
 
-from .summarizer import MarkdownSummarizer
-from .agent.document_agent import DocumentAgent
-
-__version__ = "0.1.33"
-
-__all__ = ["MarkdownSummarizer", "DocumentAgent"] 
+__all__ = [
+    'MarkdownSummarizer',
+    'ProgressStatus',
+    'ProgressUpdate',
+    'DocumentAgent',
+    'MarkdownParser'
+]

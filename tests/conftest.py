@@ -1,6 +1,9 @@
-import os
 import pytest
-from md_summarizer import MarkdownSummarizer, DocumentAgent, MarkdownParser
+import os
+from md_summarizer.config import Settings
+from md_summarizer import MarkdownSummarizer, MarkdownParser
+from md_summarizer.agent import DocumentAgent
+from pydantic_ai.usage import Usage
 import logging
 
 @pytest.fixture(scope="session", autouse=True)

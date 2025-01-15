@@ -1,6 +1,7 @@
 import pytest
 from .utils.output_formatter import format_section, format_comparison
 from .utils.assertions import assert_tokens_reduced
+from md_summarizer import MarkdownSummarizer, ProgressStatus
 
 @pytest.mark.asyncio
 async def test_basic_summarization1(summarizer, setup_test_environment):
@@ -80,6 +81,59 @@ async def test_example_doc_summarization(summarizer, setup_test_environment):
     
     # Calculate and display reductions
     format_comparison(content, result, summarizer.agent)
+
+@pytest.mark.asyncio
+async def test_streaming_updates(summarizer, setup_test_environment):
+    """Test streaming progress updates during summarization."""
+    content = """
+# Test Document
+
+## Section 1
+This is some test content.
+
+## Section 2
+More test content here.
+
+### Subsection 2.1
+Even more content.
+"""
+    
+    updates = []
+    
+    print("\n🔄 Streaming Updates:")
+    print("-" * 50)
+    
+    async for update in summarizer.stream(content):
+        updates.append(update)
+        print(f"Status: {update.status}", end="")
+        if update.status == ProgressStatus.STARTING:
+            print(f", Total Sections: {update.total_sections}")
+        elif update.status == ProgressStatus.SECTION_COMPLETE:
+            print(f", Section: {update.section_title}")
+        print()
+        
+        # Verify update sequence
+        if update.status == ProgressStatus.STARTING:
+            total = update.total_sections
+            section_count = 0
+        elif update.status == ProgressStatus.SECTION_COMPLETE:
+            section_count += 1
+            assert section_count <= total
+            # Verify section title is present
+            assert update.section_title is not None
+            assert update.section_title in ["Test Document", "Section 1", "Section 2", "Subsection 2.1"]
+        elif update.status == ProgressStatus.COMPLETE:
+            assert section_count == total
+        
+        # Store final content
+        if update.status == ProgressStatus.COMPLETE:
+            final_content = update.content
+    
+    print(f"Final content: \n\n{final_content}")
+    
+    # Verify final content exists
+    assert final_content is not None
+    assert len(final_content) > 0
 
 
 
@@ -313,165 +367,4 @@ should use `--dist-url` or `--nodedir` flags to specify the headers of the
 runtime to build for.
 
 Also when `--dist-url` or `--nodedir` flags are passed, node-gyp will use the
-`config.gypi` shipped in the headers distribution to generate build
-configurations, which is different from the default mode that would use the
-`process.config` object of the running Node.js instance.
-
-Some old versions of Electron shipped malformed `config.gypi` in their headers
-distributions, and you might need to pass `--force-process-config` to node-gyp
-to work around configuration errors.
-
-## How to Use
-
-To compile your native addon first go to its root directory:
-
-``` bash
-cd my_node_addon
-```
-
-The next step is to generate the appropriate project build files for the current
-platform. Use `configure` for that:
-
-``` bash
-node-gyp configure
-```
-
-Auto-detection fails for Visual C++ Build Tools 2015, so `--msvs_version=2015`
-needs to be added (not needed when run by npm as configured above):
-``` bash
-node-gyp configure --msvs_version=2015
-```
-
-__Note__: The `configure` step looks for a `binding.gyp` file in the current
-directory to process. See below for instructions on creating a `binding.gyp` file.
-
-Now you will have either a `Makefile` (on Unix platforms) or a `vcxproj` file
-(on Windows) in the `build/` directory. Next, invoke the `build` command:
-
-``` bash
-node-gyp build
-```
-
-Now you have your compiled `.node` bindings file! The compiled bindings end up
-in `build/Debug/` or `build/Release/`, depending on the build mode. At this point,
-you can require the `.node` file with Node.js and run your tests!
-
-__Note:__ To create a _Debug_ build of the bindings file, pass the `--debug` (or
-`-d`) switch when running either the `configure`, `build` or `rebuild` commands.
-
-## The `binding.gyp` file
-
-A `binding.gyp` file describes the configuration to build your module, in a
-JSON-like format. This file gets placed in the root of your package, alongside
-`package.json`.
-
-A barebones `gyp` file appropriate for building a Node.js addon could look like:
-
-```python
-{
-  "targets": [
-    {
-      "target_name": "binding",
-      "sources": [ "src/binding.cc" ]
-    }
-  ]
-}
-```
-
-## Further reading
-
-The **[docs](./docs/)** directory contains additional documentation on specific node-gyp topics that may be useful if you are experiencing problems installing or building addons using node-gyp.
-
-Some additional resources for Node.js native addons and writing `gyp` configuration files:
-
- * ["Going Native" a nodeschool.io tutorial](http://nodeschool.io/#goingnative)
- * ["Hello World" node addon example](https://github.com/nodejs/node/tree/main/test/addons/hello-world)
- * [gyp user documentation](https://gyp.gsrc.io/docs/UserDocumentation.md)
- * [gyp input format reference](https://gyp.gsrc.io/docs/InputFormatReference.md)
- * [*"binding.gyp" files out in the wild* wiki page](./docs/binding.gyp-files-in-the-wild.md)
-
-## Commands
-
-`node-gyp` responds to the following commands:
-
-| **Command**   | **Description**
-|:--------------|:---------------------------------------------------------------
-| `help`        | Shows the help dialog
-| `build`       | Invokes `make`/`msbuild.exe` and builds the native addon
-| `clean`       | Removes the `build` directory if it exists
-| `configure`   | Generates project build files for the current platform
-| `rebuild`     | Runs `clean`, `configure` and `build` all in a row
-| `install`     | Installs Node.js header files for the given version
-| `list`        | Lists the currently installed Node.js header versions
-| `remove`      | Removes the Node.js header files for the given version
-
-
-## Command Options
-
-`node-gyp` accepts the following command options:
-
-| **Command**                       | **Description**
-|:----------------------------------|:------------------------------------------
-| `-j n`, `--jobs n`                | Run `make` in parallel. The value `max` will use all available CPU cores
-| `--target=v6.2.1`                 | Node.js version to build for (default is `process.version`)
-| `--silly`, `--loglevel=silly`     | Log all progress to console
-| `--verbose`, `--loglevel=verbose` | Log most progress to console
-| `--silent`, `--loglevel=silent`   | Don't log anything to console
-| `debug`, `--debug`                | Make Debug build (default is `Release`)
-| `--release`, `--no-debug`         | Make Release build
-| `-C $dir`, `--directory=$dir`     | Run command in different directory
-| `--make=$make`                    | Override `make` command (e.g. `gmake`)
-| `--thin=yes`                      | Enable thin static libraries
-| `--arch=$arch`                    | Set target architecture (e.g. ia32)
-| `--tarball=$path`                 | Get headers from a local tarball
-| `--devdir=$path`                  | SDK download directory (default is OS cache directory)
-| `--ensure`                        | Don't reinstall headers if already present
-| `--dist-url=$url`                 | Download header tarball from custom URL
-| `--proxy=$url`                    | Set HTTP(S) proxy for downloading header tarball
-| `--noproxy=$urls`                 | Set urls to ignore proxies when downloading header tarball
-| `--cafile=$cafile`                | Override default CA chain (to download tarball)
-| `--nodedir=$path`                 | Set the path to the node source code
-| `--python=$path`                  | Set path to the Python binary
-| `--msvs_version=$version`         | Set Visual Studio version (Windows only)
-| `--solution=$solution`            | Set Visual Studio Solution version (Windows only)
-| `--force-process-config`          | Force using runtime's `process.config` object to generate `config.gypi` file
-
-## Configuration
-
-### Environment variables
-
-Use the form `npm_config_OPTION_NAME` for any of the command options listed
-above (dashes in option names should be replaced by underscores).
-
-For example, to set `devdir` equal to `/tmp/.gyp`, you would:
-
-Run this on Unix:
-
-```bash
-export npm_config_devdir=/tmp/.gyp
-```
-
-Or this on Windows:
-
-```console
-set npm_config_devdir=c:\temp\.gyp
-```
-
-### `npm` configuration for npm versions before v9
-
-Use the form `OPTION_NAME` for any of the command options listed above.
-
-For example, to set `devdir` equal to `/tmp/.gyp`, you would run:
-
-```bash
-npm config set [--global] devdir /tmp/.gyp
-```
-
-**Note:** Configuration set via `npm` will only be used when `node-gyp`
-is run via `npm`, not when `node-gyp` is run directly.
-
-## License
-
-`node-gyp` is available under the MIT license. See the [LICENSE
-file](LICENSE) for details.
-"""
+`config.gypi`"""

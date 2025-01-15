@@ -2,14 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional, List
 import re
 import logging
-
-@dataclass
-class Section:
-    """Represents a section of markdown content."""
-    title: str = ""
-    content: str = ""
-    level: int = 0
-    sections: Dict[str, "Section"] = field(default_factory=dict)
+from ..models import Section
 
 class MarkdownParser:
     def __init__(self):
@@ -51,42 +44,41 @@ class MarkdownParser:
 
     def _split_at_level(self, content: str, level: int) -> List[Section]:
         """Split content at specified heading level."""
-        # Find all headings at this level
         headings = self._find_headings(content, level)
         if not headings:
             return []
         
-        # Get line numbers where splits should occur
         split_points = [pos for pos, _ in headings]
-        
-        # Split content at heading positions
         section_contents = self._split_content_at_lines(content, split_points)
         
-        # Validate we have matching headings and contents
-        if len(headings) != len(section_contents):
-            self.logger.error("Mismatch between headings and content sections")
-            return []
-        
-        # Create sections
         sections = []
         for (_, title), content in zip(headings, section_contents):
+            # Find where child sections begin
+            child_matches = list(re.finditer(f'^#{{{level+1}}}\\s+', content, re.MULTILINE))
+            
+            if child_matches:
+                # Only keep content up to first child section
+                parent_content = content[:child_matches[0].start()].strip()
+            else:
+                parent_content = content.strip()
+            
             section = Section(
                 title=title,
-                content=content.strip(),
+                content=parent_content,
                 level=level
             )
             
-            # Recursively process subsections if not at max depth
-            if level < 6:  # Don't process beyond h6
-                subsections = self._split_at_level(section.content, level + 1)
+            # Process subsections
+            if level < 6:
+                subsections = self._split_at_level(content, level + 1)
                 if subsections:
                     section.sections = {
                         self._make_key(s.title): s 
                         for s in subsections
                     }
-                    
-            sections.append(section)
             
+            sections.append(section)
+        
         return sections
     
     def _make_key(self, title: str) -> str:
@@ -152,3 +144,16 @@ class MarkdownParser:
             self._make_key(section.title): section
             for section in sections
         }
+
+    def _create_section(self, match: re.Match) -> Section:
+        """Create section from regex match."""
+        level = len(match.group(1))  # Count #'s
+        title = match.group(2).strip()
+        content = match.group(3).strip() if match.group(3) else ""
+        
+        return Section(
+            title=title,
+            content=content,
+            level=level,  # Level is already correct from markdown
+            sections={}
+        )

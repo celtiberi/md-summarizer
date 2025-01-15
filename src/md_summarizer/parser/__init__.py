@@ -1,4 +1,4 @@
-"""Parser module for markdown processing."""
-from .parser import MarkdownParser, Section
+"""Markdown parsing functionality."""
+from .parser import MarkdownParser
 
-__all__ = ['MarkdownParser', 'Section'] 
+__all__ = ['MarkdownParser'] 

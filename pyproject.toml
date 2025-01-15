@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "md_summarizer"
-version = "0.1.33"
+version = "0.1.50"
 description = "AI-powered Markdown summarizer that preserves structure and code blocks"
 authors = [
     { name = "Celtiberi" }
@@ -26,7 +26,8 @@ dependencies = [
     "pydantic-ai>=0.0.18",
     "python-dotenv>=1.0.0",
     "tiktoken>=0.5.0",    
-    "pydantic-settings>=2.0.0"
+    "pydantic-settings>=2.0.0",
+    "blinker>=1.7.0"
 ]
 
 [project.urls]

@@ -36,3 +36,5 @@ htmlcov/
 # PyPI credentials
 .pypirc
 ~/.pypirc 
+
+tests/example_doc_out.md 

@@ -35,20 +35,43 @@ pip install md-summarizer
 
 ## Usage
 
-Simple usage:
+Basic usage:
 ```python
-from md_summarizer import MarkdownSummarizer
+from md_summarizer import MarkdownSummarizer, ProgressStatus
 
-# Initialize and summarize
-summarizer = MarkdownSummarizer()
-result = await summarizer.summarize(markdown_content)
+async def main():
+    summarizer = MarkdownSummarizer()
+    
+    # Basic usage - get final result
+    result = await summarizer.summarize(content)
+    print(result)
+    
+    # Streaming usage - get progress updates
+    async for update in summarizer.summarize(content):
+        if update.status == ProgressStatus.PROCESSING:
+            print(f"Processing section: {update.section} ({update.progress:.0f}%)")
+        elif update.status == ProgressStatus.COMPLETE:
+            print(f"Final summary:\n{update.content}")
 
-# Get usage statistics
-usage: pydantic_ai.usage.Usage = summarizer.usage()
-print(f"Requests: {usage.requests}")
-print(f"Input tokens: {usage.request_tokens}")
-print(f"Output tokens: {usage.response_tokens}")
-print(f"Total tokens: {usage.total_tokens}")
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+Progress updates include:
+- status: ProgressStatus enum (STARTING, PARSING, PROCESSING, COMPLETE)
+- progress: 0-100 percentage complete
+- section: Current section being processed (during "processing" status)
+- content: Final summarized text (only in "complete" status)
+
+Example output:
+```
+Starting summarization...
+Processing section: Introduction (20%)
+Processing section: API Reference (45%)
+Processing section: Examples (70%)
+Final summary:
+# Document Summary
+...
 ```
 
 ## Configuration
