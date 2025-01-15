@@ -10,7 +10,7 @@ authors = [
     { name = "Celtiberi" }
 ]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = "AGPL-3.0"
 classifiers = [
     "Development Status :: 4 - Beta",
