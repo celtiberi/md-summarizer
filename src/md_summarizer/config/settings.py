@@ -23,14 +23,15 @@ def get_settings() -> Settings:
     print("\n=== Debug: Loading Settings ===")
     print(f"Current working directory: {os.getcwd()}")
     
-    possible_paths = [
-        os.path.join(os.getcwd(), ".env"),
-        os.path.join(os.path.dirname(__file__), "../..", ".env")
+    potential_env_paths = [
+        os.path.join(os.getcwd(), '.env'),
+        os.path.join(os.path.dirname(__file__), '../../.env'),
+        os.path.join(os.path.dirname(__file__), '../.env'),
     ]
     
     print("\nTrying possible .env paths:")
     # Try each possible path
-    for env_file in possible_paths:
+    for env_file in potential_env_paths:
         print(f"Checking: {env_file}")
         print(f"File exists: {os.path.exists(env_file)}")
         if os.path.exists(env_file):

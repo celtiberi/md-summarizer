@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "md_summarizer"
-version = "0.1.61"
+version = "0.1.62"
 description = "AI-powered Markdown summarizer that preserves structure and code blocks"
 authors = [
     { name = "Celtiberi" }
