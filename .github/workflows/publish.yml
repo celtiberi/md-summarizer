@@ -26,6 +26,18 @@ jobs:
         python -m pip install --upgrade pip
         pip install build twine
     
+    - name: Setup test environment
+      run: |
+        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+        echo "MODEL=gpt-3.5-turbo" >> .env
+        echo "PROVIDER=openai" >> .env
+        echo "LOG_LEVEL=WARNING" >> .env
+    
+    - name: Run tests
+      run: |
+        pip install -e ".[test]"
+        pytest -v
+    
     - name: Build package
       run: python -m build
     
