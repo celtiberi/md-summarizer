@@ -15,10 +15,14 @@ An AI-powered tool that reduces the token size of Markdown documents while prese
 ## Usage
 
 ```python
-from md_summarizer import MarkdownSummarizer, ProgressStatus
+from md_summarizer import (
+    MarkdownSummarizer, 
+    ProgressStatus,
+    SummarizerAgent
+)
 
 # Basic usage
-summarizer = MarkdownSummarizer()
+summarizer = MarkdownSummarizer(agent=SummarizerAgent())
 result = await summarizer.summarize(content)
 
 # Streaming updates
