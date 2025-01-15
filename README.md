@@ -17,12 +17,11 @@ An AI-powered tool that reduces the token size of Markdown documents while prese
 ```python
 from md_summarizer import (
     MarkdownSummarizer, 
-    ProgressStatus,
-    SummarizerAgent
+    ProgressStatus
 )
 
 # Basic usage
-summarizer = MarkdownSummarizer(agent=SummarizerAgent())
+summarizer = MarkdownSummarizer()
 result = await summarizer.summarize(content)
 
 # Streaming updates
