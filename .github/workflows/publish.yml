@@ -37,6 +37,13 @@ jobs:
         envkey_LOG_LEVEL: "WARNING"
         file_name: .env
         fail_on_empty: true
+        directory: /home/runner/work/md-summarizer/md-summarizer
+
+    - name: Debug env file
+      run: |
+        pwd
+        ls -la
+        cat .env | grep -v OPENAI_API_KEY  # Show non-secret contents
 
     - name: Run tests
       run: |
