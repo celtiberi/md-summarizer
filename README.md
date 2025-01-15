@@ -57,7 +57,17 @@ Status: ProgressStatus.COMPLETE
 
 ## Installation
 
-The module has not yet been published to PyPI. So you need to install it from the source code.
+Install from PyPI:
+```bash
+pip install md-summarizer
+```
+
+Or install from source:
+```bash
+git clone https://github.com/celtiberi/md-summarizer.git
+cd md-summarizer
+pip install -e .
+```
 
 ## Configuration
 

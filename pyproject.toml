@@ -31,9 +31,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/md-summarizer"
-"Bug Tracker" = "https://github.com/yourusername/md-summarizer/issues"
-Source = "https://github.com/yourusername/md-summarizer"
+Homepage = "https://github.com/celtiberi/md-summarizer"
+"Bug Tracker" = "https://github.com/celtiberi/md-summarizer/issues"
+Source = "https://github.com/celtiberi/md-summarizer"
 
 [project.optional-dependencies]
 test = [
