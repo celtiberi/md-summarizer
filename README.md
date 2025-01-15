@@ -24,6 +24,12 @@ from md_summarizer import (
 summarizer = MarkdownSummarizer()
 result = await summarizer.summarize(content)
 
+# Check token usage
+usage = summarizer.agent.usage
+print(f"Input tokens: {usage.request_tokens}")
+print(f"Output tokens: {usage.response_tokens}")
+print(f"Reduction: {(1 - usage.response_tokens/usage.request_tokens):.1%}")
+
 # Streaming updates
 async for update in summarizer.stream(content):
     if update.status == ProgressStatus.STARTING:
@@ -33,6 +39,12 @@ async for update in summarizer.stream(content):
     elif update.status == ProgressStatus.COMPLETE:
         print("Done!")
         print(update.content)
+        # Show token usage after completion
+        usage = summarizer.agent.usage
+        print("\nToken Usage:")
+        print(f"Input tokens: {usage.request_tokens}")
+        print(f"Output tokens: {usage.response_tokens}")
+        print(f"Reduction: {(1 - usage.response_tokens/usage.request_tokens):.1%}")
 
 # Progress update types:
 # - ProgressStatus.STARTING: total_sections count
@@ -53,6 +65,11 @@ Status: ProgressStatus.SECTION_COMPLETE, Section: Section 1
 Status: ProgressStatus.SECTION_COMPLETE, Section: Section 2
 Status: ProgressStatus.SECTION_COMPLETE, Section: Test Document
 Status: ProgressStatus.COMPLETE
+
+Token Usage:
+Input tokens: 1250
+Output tokens: 450
+Reduction: 64.0%
 ```
 
 ## Installation
@@ -61,19 +78,16 @@ Install from PyPI:
 ```bash
 pip install md-summarizer
 ```
-
 Or install from source:
 ```bash
 git clone https://github.com/celtiberi/md-summarizer.git
 cd md-summarizer
 pip install -e .
 ```
-
 ## Configuration
 
 Set environment variables or use .env file:
-```
-OPENAI_API_KEY=your-key
+```OPENAI_API_KEY=your-key
 MODEL=gpt-3.5-turbo
 PROVIDER=openai
 LOG_LEVEL=INFO
@@ -104,3 +118,6 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+
+
