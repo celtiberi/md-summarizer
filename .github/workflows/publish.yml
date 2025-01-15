@@ -27,8 +27,10 @@ jobs:
         pip install build twine
 
     - name: Setup test environment
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       run: |
-        echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+        echo "OPENAI_API_KEY=$OPENAI_API_KEY" >> .env
         echo "MODEL=gpt-3.5-turbo" >> .env
         echo "PROVIDER=openai" >> .env
         echo "LOG_LEVEL=WARNING" >> .env
