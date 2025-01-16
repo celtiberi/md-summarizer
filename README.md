@@ -11,6 +11,7 @@ An AI-powered tool that reduces the token size of Markdown documents while prese
 - Real-time progress updates
 - Streaming API
 - Multiple AI provider support
+- Token usage tracking and reporting
 
 ## Usage
 
@@ -87,7 +88,8 @@ pip install -e .
 ## Configuration
 
 Set environment variables or use .env file:
-```OPENAI_API_KEY=your-key
+```bash
+OPENAI_API_KEY=your-key
 MODEL=gpt-3.5-turbo
 PROVIDER=openai
 LOG_LEVEL=INFO
@@ -117,7 +119,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ## License
 
-This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 
 
